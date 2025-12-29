@@ -71,7 +71,7 @@ def process_image(image_bytes: bytes, filename: str) -> dict:
             logger.warning(f"Image {filename} is large ({image.size}). Consider resizing.")
         
         # Run inference
-        results = model(image, conf=0.25, verbose=False)
+        results = model(image, conf=0.80, verbose=False)
         
         # Extract detections
         detections = []
