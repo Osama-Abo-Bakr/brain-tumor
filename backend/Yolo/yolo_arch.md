@@ -6,7 +6,7 @@
 
 ## 📌 Reference Architecture Diagram
 
-![YOLOv8 Architecture](https://github.com/Osama-Abo-Bakr/brain-tumor/backend/Yolo/yolov8.jpg)
+![YOLOv8 Architecture](backend/Yolo/yolov8.jpg)
 
 ---
 
