@@ -6,7 +6,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg)](https://streamlit.io)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
 
-An end-to-end deep learning application for detecting brain tumors in MRI images using **YOLOv8**, served through a **FastAPI** backend and visualized with a **Streamlit** frontend. Fully containerized with **Docker Compose**.
+An end-to-end deep learning application for detecting brain tumors in MRI images using **YOLOv26**, served through a **FastAPI** backend and visualized with a **Streamlit** frontend. Fully containerized with **Docker Compose**.
 
 > **Disclaimer:** This system is for **educational and research purposes only**. It is **not intended for clinical diagnosis**.
 
@@ -26,7 +26,7 @@ graph TB
         subgraph Backend Service
             B[FastAPI + Uvicorn<br/>Port: 8000]
             B1["/predict" POST Endpoint]
-            B2[YOLOv8s Model Inference]
+            B2[YOLOv26s Model Inference]
         end
 
         A1 -->|HTTP POST /predict| B1
@@ -48,7 +48,7 @@ sequenceDiagram
     participant U as User
     participant F as Streamlit Frontend
     participant B as FastAPI Backend
-    participant M as YOLOv8s Model
+    participant M as YOLOv26s Model
 
     U->>F: Upload MRI Image(s)
     F->>B: HTTP POST /predict (multipart)
@@ -67,11 +67,11 @@ sequenceDiagram
 ```
 brain-tumor/
 ├── backend/
-│   ├── backend.py            # FastAPI application with YOLOv8 inference
+│   ├── backend.py            # FastAPI application with YOLOv26 inference
 │   ├── Dockerfile            # Backend container image
 │   ├── requirements.txt      # Python dependencies
 │   └── models/
-│       └── yolo26s.pt        # Trained YOLOv8s weights
+│       └── yolo26s.pt        # Trained YOLOv26s weights
 │
 ├── frontend/
 │   ├── frontend.py           # Streamlit UI application
@@ -79,7 +79,7 @@ brain-tumor/
 │   └── requirements.txt      # Python dependencies
 │
 ├── notebook-test/
-│   ├── train_yolo.ipynb      # YOLOv8 training notebook
+│   ├── train_yolo.ipynb      # YOLOv26 training notebook
 │   └── test-image.jpg        # Sample MRI test image
 │
 ├── tests/
@@ -102,7 +102,7 @@ brain-tumor/
 
 | Property         | Value                              |
 |------------------|------------------------------------|
-| **Architecture** | YOLOv8s (Small)                    |
+| **Architecture** | YOLOv26s (Small)                    |
 | **Framework**    | Ultralytics                        |
 | **Task**         | Object Detection                   |
 | **Input**        | Brain MRI images (JPG/PNG)         |
@@ -111,7 +111,7 @@ brain-tumor/
 | **Max File Size**| 10 MB per image                    |
 | **Batch Limit**  | 20 images per request              |
 
-### YOLOv8s Architecture Summary
+### YOLOv26s Architecture Summary
 
 ```mermaid
 graph TD
@@ -253,7 +253,7 @@ pytest tests/ -v
 
 | Layer      | Technology                     |
 |------------|--------------------------------|
-| ML Model   | YOLOv8s (Ultralytics)         |
+| ML Model   | YOLOv26s (Ultralytics)         |
 | Backend    | FastAPI + Uvicorn              |
 | Frontend   | Streamlit                      |
 | Container  | Docker + Docker Compose        |

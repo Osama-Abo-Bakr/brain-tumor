@@ -77,7 +77,7 @@ class TestModelInfo:
         response = client.get("/model/info")
         assert response.status_code == 200
         data = response.json()
-        assert data["model_type"] == "YOLOv8"
+        assert data["model_type"] == "YOLOv26"
         assert "classes" in data
         assert "num_classes" in data
 
