@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Brain Tumor Detection API",
-    description="API for Brain Tumor detection using YOLOv8 model",
+    description="API for Brain Tumor detection using YOLOv26 model",
     version="1.0.0",
     debug=True,
 )
@@ -183,4 +183,4 @@ async def model_info():
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
-    return {"model_type": "YOLOv8", "model_path": MODEL_PATH, "classes": model.names, "num_classes": len(model.names)}
+    return {"model_type": "YOLOv26", "model_path": MODEL_PATH, "classes": model.names, "num_classes": len(model.names)}

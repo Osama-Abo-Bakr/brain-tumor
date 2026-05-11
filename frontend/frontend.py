@@ -128,7 +128,7 @@ st.markdown(
     <div class="header-container">
         <div class="header-title">🧠 Brain Tumor Detection System</div>
         <div class="header-subtitle">
-            Advanced AI-powered MRI analysis using YOLOv8 deep learning model
+            Advanced AI-powered MRI analysis using YOLOv26 deep learning model
         </div>
     </div>
 """,
@@ -185,7 +185,7 @@ with st.sidebar:
         st.markdown("""
         **Version:** 2.0
         
-        **Model:** YOLOv8
+        **Model:** YOLOv26
         
         **Supported Formats:**
         - JPG/JPEG
