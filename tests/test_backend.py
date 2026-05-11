@@ -1,8 +1,8 @@
 import io
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi.testclient import TestClient
 
 
 def _make_mock_model():
@@ -24,12 +24,26 @@ def _make_mock_model():
 @pytest.fixture
 def client():
     mock_model = _make_mock_model()
+    mock_yolo_cls = MagicMock(return_value=mock_model)
 
-    with patch("backend.YOLO", return_value=mock_model):
-        with patch("backend.model", mock_model):
-            from backend import app
+    # Patch ultralytics.YOLO before importing backend so module-level
+    # YOLO(MODEL_PATH) uses the mock instead of loading a real model.
+    mock_ultralytics = MagicMock()
+    mock_ultralytics.YOLO = mock_yolo_cls
 
-            yield TestClient(app)
+    with patch.dict(sys.modules, {"ultralytics": mock_ultralytics}):
+        # Remove cached backend module so it re-imports with the mock
+        sys.modules.pop("backend", None)
+
+        import backend
+
+        backend.model = mock_model
+        from fastapi.testclient import TestClient
+
+        yield TestClient(backend.app)
+
+        # Cleanup
+        sys.modules.pop("backend", None)
 
 
 @pytest.fixture
@@ -141,29 +155,29 @@ class TestPredict:
 
 class TestValidation:
     def test_validate_image_accepts_jpeg(self, client):
-        from backend import validate_image
+        import backend
 
         mock_file = MagicMock()
         mock_file.content_type = "image/jpeg"
-        assert validate_image(mock_file) is True
+        assert backend.validate_image(mock_file) is True
 
     def test_validate_image_accepts_png(self, client):
-        from backend import validate_image
+        import backend
 
         mock_file = MagicMock()
         mock_file.content_type = "image/png"
-        assert validate_image(mock_file) is True
+        assert backend.validate_image(mock_file) is True
 
     def test_validate_image_rejects_gif(self, client):
-        from backend import validate_image
+        import backend
 
         mock_file = MagicMock()
         mock_file.content_type = "image/gif"
-        assert validate_image(mock_file) is False
+        assert backend.validate_image(mock_file) is False
 
     def test_validate_image_rejects_text(self, client):
-        from backend import validate_image
+        import backend
 
         mock_file = MagicMock()
         mock_file.content_type = "text/plain"
-        assert validate_image(mock_file) is False
+        assert backend.validate_image(mock_file) is False
