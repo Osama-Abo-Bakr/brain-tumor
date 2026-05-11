@@ -3,4 +3,3 @@ uvicorn[standard]
 ultralytics
 python-multipart
 pillow
-streamlit
