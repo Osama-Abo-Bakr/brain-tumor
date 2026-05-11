@@ -1,11 +1,10 @@
 # Brain Tumor Detection System
 
-[![CI/CD Pipeline](https://github.com/Osama-Abo-Bakr/brain-tumor-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Osama-Abo-Bakr/brain-tumor-detection/actions)
+[![CI/CD Pipeline](https://github.com/Osama-Abo-Bakr/brain-tumor/actions/workflows/ci.yml/badge.svg)](https://github.com/Osama-Abo-Bakr/brain-tumor/actions)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg)](https://streamlit.io)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An end-to-end deep learning application for detecting brain tumors in MRI images using **YOLOv8**, served through a **FastAPI** backend and visualized with a **Streamlit** frontend. Fully containerized with **Docker Compose**.
 
@@ -15,64 +14,50 @@ An end-to-end deep learning application for detecting brain tumors in MRI images
 
 ## System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Docker Compose                           │
-│                                                                 │
-│  ┌──────────────────────┐       ┌──────────────────────────┐   │
-│  │   Frontend Service    │       │    Backend Service        │   │
-│  │   (Streamlit)         │       │    (FastAPI + Uvicorn)    │   │
-│  │                       │       │                          │   │
-│  │  ┌─────────────────┐ │       │  ┌────────────────────┐  │   │
-│  │  │  Upload MRI      │ │ HTTP  │  │  /predict           │  │   │
-│  │  │  Images           │─┼──────┼─▶│  POST endpoint      │  │   │
-│  │  └─────────────────┘ │       │  └────────┬───────────┘  │   │
-│  │                       │       │           │              │   │
-│  │  ┌─────────────────┐ │       │  ┌────────▼───────────┐  │   │
-│  │  │  Bounding Box    │ │       │  │  YOLOv8s Model     │  │   │
-│  │  │  Visualization   │◀┼──────┼──│  (Inference)        │  │   │
-│  │  └─────────────────┘ │  JSON │  └────────────────────┘  │   │
-│  │                       │       │                          │   │
-│  │  Port: 8501           │       │  Port: 8000              │   │
-│  └──────────────────────┘       └──────────────────────────┘   │
-│                                                                 │
-│                        Network: brain_net                        │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Docker Compose
+        subgraph Frontend Service
+            A[Streamlit UI<br/>Port: 8501]
+            A1[Upload MRI Images]
+            A2[Bounding Box Visualization]
+        end
+
+        subgraph Backend Service
+            B[FastAPI + Uvicorn<br/>Port: 8000]
+            B1["/predict" POST Endpoint]
+            B2[YOLOv8s Model Inference]
+        end
+
+        A1 -->|HTTP POST /predict| B1
+        B1 --> B2
+        B2 -->|JSON Response| A2
+    end
+
+    User((User)) --> A1
+    A2 --> User
+
+    style Frontend Service fill:#e8eaf6,stroke:#3f51b5
+    style Backend Service fill:#e8f5e9,stroke:#4caf50
 ```
 
 ### Data Flow
 
-```
-User uploads MRI image(s)
-        │
-        ▼
-┌───────────────┐    HTTP POST     ┌────────────────┐
-│   Streamlit   │ ──────────────▶  │    FastAPI      │
-│   Frontend    │   /predict       │    Backend      │
-└───────┬───────┘                  └───────┬────────┘
-        │                                  │
-        │                          ┌───────▼────────┐
-        │                          │  Image          │
-        │                          │  Validation     │
-        │                          │  (type, size)   │
-        │                          └───────┬────────┘
-        │                                  │
-        │                          ┌───────▼────────┐
-        │                          │  YOLOv8s        │
-        │                          │  Inference      │
-        │                          │  (conf >= 0.80) │
-        │                          └───────┬────────┘
-        │                                  │
-        │          JSON response           │
-        │  ◀───────────────────────────────┘
-        │   {detections, bboxes, confidence}
-        │
-┌───────▼───────┐
-│  Render        │
-│  - BBox overlay│
-│  - Zoom region │
-│  - Stats table │
-└───────────────┘
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Streamlit Frontend
+    participant B as FastAPI Backend
+    participant M as YOLOv8s Model
+
+    U->>F: Upload MRI Image(s)
+    F->>B: HTTP POST /predict (multipart)
+    B->>B: Validate Image (type, size)
+    B->>M: Run Inference (conf >= 0.80)
+    M-->>B: Detections (bbox, class, confidence)
+    B-->>F: JSON Response
+    F->>F: Render BBox Overlay + Zoom Region
+    F-->>U: Display Results + Stats Table
 ```
 
 ---
@@ -85,11 +70,8 @@ brain-tumor/
 │   ├── backend.py            # FastAPI application with YOLOv8 inference
 │   ├── Dockerfile            # Backend container image
 │   ├── requirements.txt      # Python dependencies
-│   ├── models/
-│   │   └── model_yolov8s.pt  # Trained YOLOv8s weights
-│   └── Yolo/
-│       ├── yolo_arch.md      # YOLOv8 architecture notes
-│       └── yolov8.jpg        # Architecture diagram
+│   └── models/
+│       └── yolo26s.pt        # Trained YOLOv8s weights
 │
 ├── frontend/
 │   ├── frontend.py           # Streamlit UI application
@@ -97,8 +79,7 @@ brain-tumor/
 │   └── requirements.txt      # Python dependencies
 │
 ├── notebook-test/
-│   ├── Brain_Tumor.ipynb     # Model training notebook
-│   ├── YOLO_Brain_Tumor.ipynb# YOLOv8 training notebook
+│   ├── train_yolo.ipynb      # YOLOv8 training notebook
 │   └── test-image.jpg        # Sample MRI test image
 │
 ├── tests/
@@ -132,26 +113,16 @@ brain-tumor/
 
 ### YOLOv8s Architecture Summary
 
-```
-Input (640x640x3)
-      │
-      ▼
-┌─────────────┐
-│  Backbone    │  C2f blocks + SPPF
-│  (CSPNet)    │  Feature extraction
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│    Neck      │  FPN (top-down) + PAN (bottom-up)
-│  (FPN+PAN)   │  Multi-scale feature fusion
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│    Head      │  Decoupled + Anchor-free
-│ (Detection)  │  BBox regression + Classification
-└─────────────┘
+```mermaid
+graph TD
+    A["Input (640x640x3)"] --> B["Backbone (CSPNet)<br/>C2f blocks + SPPF<br/>Feature Extraction"]
+    B --> C["Neck (FPN + PAN)<br/>Multi-scale Feature Fusion"]
+    C --> D["Head (Detection)<br/>Decoupled + Anchor-free<br/>BBox Regression + Classification"]
+
+    style A fill:#fff3e0,stroke:#ff9800
+    style B fill:#e3f2fd,stroke:#2196f3
+    style C fill:#f3e5f5,stroke:#9c27b0
+    style D fill:#e8f5e9,stroke:#4caf50
 ```
 
 ---
@@ -226,8 +197,8 @@ GET /model/info
 
 ```bash
 # Clone the repository
-git clone https://github.com/Osama-Abo-Bakr/brain-tumor-detection.git
-cd brain-tumor-detection
+git clone https://github.com/Osama-Abo-Bakr/brain-tumor.git
+cd brain-tumor
 
 # Build and start all services
 docker compose up --build
@@ -293,17 +264,10 @@ pytest tests/ -v
 
 ---
 
-## Authors
+## Team
 
-| Name               | Role          |
-|--------------------|---------------|
-| **Osama Abo Bakr** | Developer     |
-| **Ahmed Nos7y**    | Developer     |
-| **Ahmed Fawzy**    | Developer     |
-| **Sherief Mohamed** | Developer    |
-
----
-
-## License
-
-This project is developed as a **Final College Project** for educational purposes.
+| Name                  | Role       |
+|-----------------------|------------|
+| **Osama Abo-Bakr**   | Team Leader|
+| **Ahmed Noshy**       | Developer  |
+| **Sherif Mohamed**    | Developer  |

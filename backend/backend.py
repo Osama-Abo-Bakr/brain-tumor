@@ -32,7 +32,7 @@ app.add_middleware(
 # ============================
 # Model Loading
 # ============================
-MODEL_PATH = "./backend/models/model_yolov8s.pt"
+MODEL_PATH = "./backend/models/yolo26s.pt"
 model = YOLO(MODEL_PATH)
 logger.info(f"✅ Model loaded successfully from: {MODEL_PATH}")
 
